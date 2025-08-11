@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Professional Resume Generator</title>
+    <!-- Assuming style.css is linked and provides the necessary styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <style>
+        /* Optional: style Remove button to appear small and top-right */
+        .field-entry {
+            position: relative;
+            padding: 15px; /* Adjust padding to make space for the button */
+            padding-top: 30px; /* space for remove button */
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .remove-entry-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 2px 8px;
+            font-size: 12px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .remove-entry-button:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Generate Your Professional Resume</h1>
+            <p>Fill out the form below to create a professional HTML and LaTeX resume.</p>
+            <button type="button" id="load-sample-data" class="load-data-button">Load Sample Data</button>
+        </header>
+
+        <form action="{{ url_for('generate_resume') }}" method="post">
+
+            <section class="form-section">
+                <h2>1. Personal Information</h2>
+                <div class="input-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" value="{{ data.name or '' }}" required />
+                </div>
+                <div class="input-group">
+                    <label for="location">City, State</label>
+                    <input type="text" id="location" name="location" value="{{ data.location or '' }}" />
+                </div>
+                <div class="input-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ data.phone or '' }}" />
+                </div>
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" value="{{ data.email or '' }}" required />
+                </div>
+                <div class="input-group">
+                    <label for="linkedin">LinkedIn URL</label>
+                    <input type="url" id="linkedin" name="linkedin" value="{{ data.linkedin or '' }}" />
+                </div>
+                <div class="input-group">
+                    <label for="github">GitHub URL</label>
+                    <input type="url" id="github" name="github" value="{{ data.github or '' }}" />
+                </div>
+            </section>
+
+            <section class="form-section" id="education-section">
+                <h2>2. Education</h2>
+                <div class="repeatable-fields" data-section="education">
+                    <div class="field-entry template" style="display:none;">
+                        <button type="button" class="remove-entry-button">Remove</button>
+                        <div class="input-group">
+                            <label>Institution</label>
+                            <input type="text" name="institution[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Location</label>
+                            <input type="text" name="edu_location[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Degree</label>
+                            <input type="text" name="degree[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Dates</label>
+                            <input type="text" name="edu_dates[]" placeholder="e.g., 2018 -- 2022" />
+                        </div>
+                        <div class="input-group">
+                            <label>GPA</label>
+                            <input type="text" name="gpa[]" />
+                        </div>
+                    </div>
+                    <!-- Conditional rendering for existing education data -->
+                    {% if data.education %}
+                        {% for edu in data.education %}
+                        <div class="field-entry">
+                            <button type="button" class="remove-entry-button">Remove</button>
+                            <div class="input-group">
+                                <label>Institution</label>
+                                <input type="text" name="institution[]" value="{{ edu.institution or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Location</label>
+                                <input type="text" name="edu_location[]" value="{{ edu.location or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Degree</label>
+                                <input type="text" name="degree[]" value="{{ edu.degree or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Dates</label>
+                                <input type="text" name="edu_dates[]" value="{{ edu.dates or '' }}" placeholder="e.g., 2018 -- 2022" />
+                            </div>
+                            <div class="input-group">
+                                <label>GPA</label>
+                                <input type="text" name="gpa[]" value="{{ edu.gpa or '' }}" />
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Default empty entry if no data exists -->
+                        <div class="field-entry">
+                            <button type="button" class="remove-entry-button">Remove</button>
+                            <div class="input-group">
+                                <label>Institution</label>
+                                <input type="text" name="institution[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Location</label>
+                                <input type="text" name="edu_location[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Degree</label>
+                                <input type="text" name="degree[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Dates</label>
+                                <input type="text" name="edu_dates[]" placeholder="e.g., 2018 -- 2022" />
+                            </div>
+                            <div class="input-group">
+                                <label>GPA</label>
+                                <input type="text" name="gpa[]" />
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="button" class="add-button" data-add="education">+ Add Education</button>
+            </section>
+
+            <section class="form-section" id="experience-section">
+                <h2>3. Experience</h2>
+                <div class="repeatable-fields" data-section="experience">
+                    <div class="field-entry template" style="display:none;">
+                        <button type="button" class="remove-entry-button">Remove</button>
+                        <div class="input-group">
+                            <label>Company</label>
+                            <input type="text" name="company[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Location</label>
+                            <input type="text" name="exp_location[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Job Role</label>
+                            <input type="text" name="role[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Years</label>
+                            <input type="text" name="years[]" placeholder="e.g., April 2019 -- Present" />
+                        </div>
+                        <div class="input-group">
+                            <label>Details (one per line)</label>
+                            <textarea name="exp_details[]" rows="4"></textarea>
+                        </div>
+                    </div>
+                    <!-- Conditional rendering for existing experience data -->
+                    {% if data.experience %}
+                        {% for exp in data.experience %}
+                        <div class="field-entry">
+                            <button type="button" class="remove-entry-button">Remove</button>
+                            <div class="input-group">
+                                <label>Company</label>
+                                <input type="text" name="company[]" value="{{ exp.company or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Location</label>
+                                <input type="text" name="exp_location[]" value="{{ exp.location or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Job Role</label>
+                                <input type="text" name="role[]" value="{{ exp.role or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Years</label>
+                                <input type="text" name="years[]" value="{{ exp.years or '' }}" placeholder="e.g., April 2019 -- Present" />
+                            </div>
+                            <div class="input-group">
+                                <label>Details (one per line)</label>
+                                <textarea name="exp_details[]" rows="4">{{ exp.details|join('\n') or '' }}</textarea>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Default empty entry if no data exists -->
+                        <div class="field-entry">
+                            <button type="button" class="remove-entry-button">Remove</button>
+                            <div class="input-group">
+                                <label>Company</label>
+                                <input type="text" name="company[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Location</label>
+                                <input type="text" name="exp_location[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Job Role</label>
+                                <input type="text" name="role[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Years</label>
+                                <input type="text" name="years[]" placeholder="e.g., April 2019 -- Present" />
+                            </div>
+                            <div class="input-group">
+                                <label>Details (one per line)</label>
+                                <textarea name="exp_details[]" rows="4"></textarea>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="button" class="add-button" data-add="experience">+ Add Experience</button>
+            </section>
+
+            <section class="form-section" id="projects-section">
+                <h2>4. Projects (Optional)</h2>
+                <div class="repeatable-fields" data-section="projects">
+                    <div class="field-entry template" style="display:none;">
+                        <button type="button" class="remove-entry-button">Remove</button>
+                        <div class="input-group">
+                            <label>Project Name</label>
+                            <input type="text" name="project_name[]" />
+                        </div>
+                        <div class="input-group">
+                            <label>Technologies Used</label>
+                            <input type="text" name="technologies[]" placeholder="e.g., Python, Flask, HTML" />
+                        </div>
+                        <div class="input-group">
+                            <label>Dates</label>
+                            <input type="text" name="proj_dates[]" placeholder="e.g., Spring 2024" />
+                        </div>
+                        <div class="input-group">
+                            <label>Summary</label>
+                            <textarea name="proj_summary[]" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <!-- Conditional rendering for existing project data -->
+                    {% if data.projects %}
+                        {% for proj in data.projects %}
+                        <div class="field-entry">
+                            <button type="button" class="remove-entry-button">Remove</button>
+                            <div class="input-group">
+                                <label>Project Name</label>
+                                <input type="text" name="project_name[]" value="{{ proj.name or '' }}" />
+                            </div>
+                            <div class="input-group">
+                                <label>Technologies Used</label>
+                                <input type="text" name="technologies[]" value="{{ proj.technologies or '' }}" placeholder="e.g., Python, Flask, HTML" />
+                            </div>
+                            <div class="input-group">
+                                <label>Dates</label>
+                                <input type="text" name="proj_dates[]" value="{{ proj.dates or '' }}" placeholder="e.g., Spring 2024" />
+                            </div>
+                            <div class="input-group">
+                                <label>Summary</label>
+                                <textarea name="proj_summary[]" rows="3">{{ proj.summary or '' }}</textarea>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Default empty entry if no data exists -->
+                        <div class="field-entry">
+                            <button type="button" class="remove-entry-button">Remove</button>
+                            <div class="input-group">
+                                <label>Project Name</label>
+                                <input type="text" name="project_name[]" />
+                            </div>
+                            <div class="input-group">
+                                <label>Technologies Used</label>
+                                <input type="text" name="technologies[]" placeholder="e.g., Python, Flask, HTML" />
+                            </div>
+                            <div class="input-group">
+                                <label>Dates</label>
+                                <input type="text" name="proj_dates[]" placeholder="e.g., Spring 2024" />
+                            </div>
+                            <div class="input-group">
+                                <label>Summary</label>
+                                <textarea name="proj_summary[]" rows="3"></textarea>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="button" class="add-button" data-add="projects">+ Add Project</button>
+            </section>
+
+            <section class="form-section">
+                <h2>5. Skills</h2>
+                <div class="input-group">
+                    <label for="languages">Languages (comma separated)</label>
+                    <textarea id="languages" name="languages" rows="3">{{ data.get('skills', {}).get('Languages', [])|join(', ') }}</textarea>
+                </div>
+                <div class="input-group">
+                    <label for="software">Software (comma separated)</label>
+                    <textarea id="software" name="software" rows="3">{{ data.get('skills', {}).get('Software', [])|join(', ') }}</textarea>
+                </div>
+            </section>
+
+            <button type="submit" class="submit-button">Generate Resume</button>
+        </form>
+    </div>
+
+    <!-- Assuming scripts.js is linked and provides the necessary JavaScript logic -->
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ name }} - Resume</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { font-family: 'Lato', sans-serif; line-height: 1.5; color: #333; margin: 40px; }
+        .header { text-align: center; margin-bottom: 1rem; }
+        .header h1 { margin: 0; font-weight: bold; color: #2c3e50; }
+        .header p { margin: 0; font-size: 1rem; color: #555; }
+        .contact-info { display: flex; justify-content: center; gap: 15px; margin-top: 0.5rem; }
+        .contact-info a { color: #333; text-decoration: none; }
+        .contact-info a:hover { text-decoration: underline; }
+        h2 { font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 1.5rem; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 1rem; }
+        .header-row { display: flex; justify-content: space-between; }
+        .header-row .left { font-weight: bold; }
+        .header-row .right { font-weight: bold; }
+        .subheader-row { display: flex; justify-content: space-between; font-style: italic; }
+        .subheader-row .right { font-style: italic; }
+        .bullet-list { list-style-type: disc; margin: 0.5rem 0 0 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ name }}</h1>
+        <p>{{ location }}</p>
+        <div class="contact-info">
+            <span><i class="fas fa-phone-square"></i> {{ phone }}</span>
+            <span><i class="fas fa-envelope-square"></i> {{ email }}</span>
+            {% if github %}<span><a href="{{ github }}"><i class="fab fa-github-square"></i> github.com/profile</a></span>{% endif %}
+            {% if linkedin %}<span><a href="{{ linkedin }}"><i class="fab fa-linkedin"></i> linkedin.com/in/profile</a></span>{% endif %}
+        </div>
+    </div>
+
+    <h2>Experience</h2>
+    <ul>
+    {% for exp in experience %}
+        <li>
+            <div class="header-row">
+                <span class="left">{{ exp.company }}</span>
+                <span class="right">{{ exp.location }}</span>
+            </div>
+            <div class="subheader-row">
+                <span class="left">{{ exp.role }}</span>
+                <span class="right">{{ exp.years }}</span>
+            </div>
+            <ul class="bullet-list">
+            {% for bullet in exp.details %}
+                <li>{{ bullet }}</li>
+            {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+
+    <h2>Projects</h2>
+    <ul>
+    {% for proj in projects %}
+        <li>
+            <div class="header-row">
+                <span class="left">{{ proj.name }}</span>
+                <span class="right">{{ proj.dates }}</span>
+            </div>
+            <div class="subheader-row">
+                <span class="left">Technologies: {{ proj.technologies }}</span>
+                <span class="right"></span>
+            </div>
+            <ul class="bullet-list">
+                <li>{{ proj.summary }}</li>
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+
+    <h2>Skills</h2>
+    <ul>
+    {% for skill_type, skill_list in skills.items() %}
+        <li><strong>{{ skill_type }}:</strong> {{ skill_list | join(', ') }}</li>
+    {% endfor %}
+    </ul>
+
+    <h2>Education</h2>
+    <ul>
+    {% for edu in education %}
+        <li>
+            <div class="header-row">
+                <span class="left">{{ edu.institution }}</span>
+                <span class="right">{{ edu.location }}</span>
+            </div>
+            <div class="subheader-row">
+                <span class="left">{{ edu.degree }} (GPA: {{ edu.gpa }})</span>
+                <span class="right">{{ edu.dates }}</span>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

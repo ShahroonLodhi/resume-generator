@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .preview-pane {
+            flex: 1;
+            min-width: 400px;
+            max-width: 800px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .download-button, .edit-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: background-color 0.3s;
+            text-decoration: none; /* Add this to style the link as a button */
+            display: inline-block; /* Add this to make the link behave like a button */
+        }
+        .download-button.html {
+            background-color: #007bff;
+        }
+        .download-button.html:hover {
+            background-color: #0056b3;
+        }
+        .download-button.tex {
+            background-color: #28a745;
+        }
+        .download-button.tex:hover {
+            background-color: #218838;
+        }
+        .edit-button {
+            background-color: #6c757d;
+        }
+        .edit-button:hover {
+            background-color: #5a6268;
+        }
+        .template-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h1>Resume Preview</h1>
+        <div class="template-selector-container">
+            <label for="template_choice">Change Template:</label>
+            <form id="template-change-form" action="{{ url_for('update_template') }}" method="post">
+                <select id="template_choice" name="template_choice" onchange="this.form.submit()">
+                    <option value="professional" {% if data.template_choice == 'professional' %}selected{% endif %}>Professional (Classic)</option>
+                    <option value="modern" {% if data.template_choice == 'modern' %}selected{% endif %}>Modern (Simple)</option>
+                </select>
+            </form>
+        </div>
+        <div class="button-group">
+            <a href="{{ url_for('download', file_type='html') }}" class="download-button html">Download HTML</a>
+            <a href="{{ url_for('download', file_type='tex') }}" class="download-button tex">Download LaTeX</a>
+            <a href="{{ url_for('index') }}" class="edit-button">Edit</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="preview-pane">
+            <h2>HTML Preview</h2>
+            <iframe srcdoc="{{ html_content }}"></iframe>
+        </div>
+        <div class="preview-pane">
+            <h2>LaTeX Preview</h2>
+            <iframe srcdoc="<pre>{{ latex_content }}</pre>"></iframe>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,108 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[letterpaper,margin=0.5in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{mdwlist}
+\usepackage[default]{lato}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{fontawesome5}
+\usepackage{enumitem}
+\pagestyle{empty}
+\setlength{\tabcolsep}{0em}
+
+\newcommand{\headerrow}[2]
+{\begin{tabular*}{\linewidth}{l@{\extracolsep{\fill}}r}
+#1 &
+#2 \\
+\end{tabular*}}
+
+\begin{document}
+
+\begin{center}
+	{\LARGE \textbf{ {{ name }} }}\\{{ location }}
+	\vspace{0.05cm}
+	\\
+	\raisebox{-0.2\height} {\Large \faPhoneSquare} \ \ {{ phone }}
+	\hfill\raisebox{-0.2\height}{\Large \faEnvelopeSquare} \ \ {{ email }}
+	{% if github %}
+	\hfill \raisebox{-0.2\height}{\Large \faGithubSquare} \ \ \href{ {{ github }} }{github.com/profile}
+	{% endif %}
+	{% if linkedin %}
+	\hfill \raisebox{-0.2\height}{\Large \faLinkedin} \ \ \href{ {{ linkedin }} }{linkedin.com/in/profile}
+	{% endif %}
+\end{center}
+
+\hrule
+\vspace{-1em}
+\subsection*{\Large Experience}
+
+\renewcommand\labelitemi{}
+\renewcommand\labelitemii{$\bullet$}
+\begin{itemize}[leftmargin=1em]
+	\parskip=0.1em
+	{% for exp in experience %}
+	\item
+	      \headerrow
+	      {\textbf{ {{ exp.company }} }}
+	      {\textbf{ {{ exp.location }} }}
+	      \headerrow
+	      {\emph{ {{ exp.role }} }}
+	      {\emph{ {{ exp.years }} }}
+	      \begin{itemize*}
+			{% for bullet in exp.details %}
+	     	\item {{ bullet }}
+			{% endfor %}
+	      \end{itemize*}
+	{% endfor %}
+\end{itemize}
+
+\hrule
+\vspace{-1em}
+\subsection*{\Large Projects}
+
+\begin{itemize}[leftmargin=1em]
+	\parskip=0.1em
+	{% for proj in projects %}
+	\item
+	      \headerrow
+	      {\textbf{ {{ proj.name }} }}
+	      {\textbf{ {{ proj.dates }} }}
+	      \headerrow
+	      {\emph{Technologies: {{ proj.technologies }} }}
+	      {\emph{}}
+	      \begin{itemize*}
+	     	\item {{ proj.summary }}
+	      \end{itemize*}
+	{% endfor %}
+\end{itemize}
+
+\hrule
+\vspace{-1em}
+\subsection*{\Large Skills}
+
+\hyphenpenalty=1000
+\begin{itemize}[leftmargin=1em,noitemsep]
+	{% for skill_type, skill_list in skills.items() %}
+	\item \textbf{ {{ skill_type }} : }
+	      {{ skill_list | join(', ') }}
+	{% endfor %}
+\end{itemize}
+
+\hrule
+\vspace{-1em}
+\subsection*{\Large Education}
+
+\begin{itemize}[leftmargin=1em]
+	\parskip=0.1em
+	{% for edu in education %}
+	\item
+	      \headerrow
+	      {\textbf{ {{ edu.institution }} }}
+	      {\textbf{ {{ edu.location }} }}
+	      \headerrow
+	      {\emph{ {{ edu.degree }} } (\textbf{GPA:} {{ edu.gpa }})}
+	      {\emph{ {{ edu.dates }} }}
+	{% endfor %}
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ name }} - Resume</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.5; color: #333; margin: 40px; }
+        h1 { margin-bottom: 0; color: #2c3e50; }
+        .contact { font-size: 14px; color: #555; }
+        h2 { border-bottom: 2px solid #3498db; padding-bottom: 4px; margin-top: 30px; color: #34495e; }
+        ul { list-style: none; padding: 0; }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>{{ name }}</h1>
+    <p class="contact">
+        {{ phone }} | {{ email }}
+        {% if linkedin %}| <a href="{{ linkedin }}">LinkedIn</a>{% endif %}
+        {% if github %}| <a href="{{ github }}">GitHub</a>{% endif %}
+    </p>
+
+    <h2>Education</h2>
+    <ul>
+    {% for edu in education %}
+        <li><strong>{{ edu.degree }}</strong>, {{ edu.institution }} - {{ edu.location }} ({{ edu.dates }}) — GPA: {{ edu.gpa }}</li>
+    {% endfor %}
+    </ul>
+
+    <h2>Experience</h2>
+    <ul>
+    {% for job in experience %}
+        <li><strong>{{ job.role }}</strong>, {{ job.company }} ({{ job.years }})</li>
+    {% endfor %}
+    </ul>
+
+    {% if projects %}
+    <h2>Projects</h2>
+    <ul>
+    {% for proj in projects %}
+        <li><strong>{{ proj.name }}</strong> — {{ proj.technologies }} ({{ proj.dates }})<br>{{ proj.summary }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+
+    <h2>Skills</h2>
+    <p>{{ skills | join(", ") }}</p>
+</body>
+</html>

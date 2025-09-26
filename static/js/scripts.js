@@ -59,98 +59,141 @@ document.addEventListener('DOMContentLoaded', function () {
     },
   };
 
-  // Function to populate personal info and skills
-  function populatePersonalInfo(data) {
-    document.getElementById("name").value = data.name || "";
-    document.getElementById("location").value = data.location || "";
-    document.getElementById("phone").value = data.phone || "";
-    document.getElementById("email").value = data.email || "";
-    document.getElementById("linkedin").value = data.linkedin || "";
-    document.getElementById("github").value = data.github || "";
+  // Function to safely get value from an element, returning empty string if null/undefined
+  function safeGetValue(element, property = 'value') {
+    return element ? (element[property] || '') : '';
+  }
 
-    document.getElementById("languages").value = data.skills.languages || "";
-    document.getElementById("software").value = data.skills.software || "";
+  // Function to safely set value on an element
+  function safeSetValue(element, value, property = 'value') {
+    if (element) {
+      element[property] = value || '';
+    }
+  }
+
+  // Function to populate personal info and skills - all optional
+  function populatePersonalInfo(data) {
+    safeSetValue(document.getElementById("name"), data.name);
+    safeSetValue(document.getElementById("location"), data.location);
+    safeSetValue(document.getElementById("phone"), data.phone);
+    safeSetValue(document.getElementById("email"), data.email);
+    safeSetValue(document.getElementById("linkedin"), data.linkedin);
+    safeSetValue(document.getElementById("github"), data.github);
+
+    // Handle skills safely
+    const skillsData = data.skills || {};
+    safeSetValue(document.getElementById("languages"), skillsData.languages);
+    safeSetValue(document.getElementById("software"), skillsData.software);
   }
 
   // Generic function to clear non-template entries in a container
   function clearEntries(container) {
-    container.querySelectorAll(".field-entry:not(.template)").forEach((el) => el.remove());
+    if (container) {
+      container.querySelectorAll(".field-entry:not(.template)").forEach((el) => el.remove());
+    }
   }
 
   // Generic function to clone and fill an entry based on a template and data mapping
   function addEntries(container, templateSelector, dataArray, fillCallback) {
+    if (!container) return;
+    
     clearEntries(container);
     const template = container.querySelector(templateSelector);
     if (!template) return;
-    dataArray.forEach((item) => {
+    
+    // If no data provided, create one empty entry
+    const arrayToProcess = (dataArray && dataArray.length > 0) ? dataArray : [{}];
+    
+    arrayToProcess.forEach((item) => {
       const newEntry = template.cloneNode(true);
       newEntry.style.display = "";
       newEntry.classList.remove("template");
-      fillCallback(newEntry, item);
+      fillCallback(newEntry, item || {});
       container.appendChild(newEntry);
     });
   }
 
-  // Fill functions for each repeatable section
+  // Fill functions for each repeatable section - all fields optional
   function fillEducation(entry, edu) {
-    entry.querySelector('input[name="institution[]"]').value = edu.institution || "";
-    entry.querySelector('input[name="edu_location[]"]').value = edu.edu_location || "";
-    entry.querySelector('input[name="degree[]"]').value = edu.degree || "";
-    entry.querySelector('input[name="edu_dates[]"]').value = edu.edu_dates || "";
-    entry.querySelector('input[name="gpa[]"]').value = edu.gpa || "";
+    const institutionInput = entry.querySelector('input[name="institution[]"]');
+    const locationInput = entry.querySelector('input[name="edu_location[]"]');
+    const degreeInput = entry.querySelector('input[name="degree[]"]');
+    const datesInput = entry.querySelector('input[name="edu_dates[]"]');
+    const gpaInput = entry.querySelector('input[name="gpa[]"]');
+
+    safeSetValue(institutionInput, edu.institution);
+    safeSetValue(locationInput, edu.edu_location);
+    safeSetValue(degreeInput, edu.degree);
+    safeSetValue(datesInput, edu.edu_dates);
+    safeSetValue(gpaInput, edu.gpa);
   }
 
   function fillExperience(entry, exp) {
-    entry.querySelector('input[name="company[]"]').value = exp.company || "";
-    entry.querySelector('input[name="exp_location[]"]').value = exp.exp_location || "";
-    entry.querySelector('input[name="role[]"]').value = exp.role || "";
-    entry.querySelector('input[name="years[]"]').value = exp.years || "";
-    entry.querySelector('textarea[name="exp_details[]"]').value = exp.details || "";
+    const companyInput = entry.querySelector('input[name="company[]"]');
+    const locationInput = entry.querySelector('input[name="exp_location[]"]');
+    const roleInput = entry.querySelector('input[name="role[]"]');
+    const yearsInput = entry.querySelector('input[name="years[]"]');
+    const detailsTextarea = entry.querySelector('textarea[name="exp_details[]"]');
+
+    safeSetValue(companyInput, exp.company);
+    safeSetValue(locationInput, exp.exp_location);
+    safeSetValue(roleInput, exp.role);
+    safeSetValue(yearsInput, exp.years);
+    safeSetValue(detailsTextarea, exp.details);
   }
 
   function fillProject(entry, proj) {
-    entry.querySelector('input[name="project_name[]"]').value = proj.project_name || "";
-    entry.querySelector('input[name="technologies[]"]').value = proj.technologies || "";
-    entry.querySelector('input[name="proj_dates[]"]').value = proj.proj_dates || "";
-    entry.querySelector('textarea[name="proj_summary[]"]').value = proj.proj_summary || "";
+    const nameInput = entry.querySelector('input[name="project_name[]"]');
+    const techInput = entry.querySelector('input[name="technologies[]"]');
+    const datesInput = entry.querySelector('input[name="proj_dates[]"]');
+    const summaryTextarea = entry.querySelector('textarea[name="proj_summary[]"]');
+
+    safeSetValue(nameInput, proj.project_name);
+    safeSetValue(techInput, proj.technologies);
+    safeSetValue(datesInput, proj.proj_dates);
+    safeSetValue(summaryTextarea, proj.proj_summary);
   }
 
   // The main function to populate the entire form with sample data
   function populateForm(data) {
-    populatePersonalInfo(data);
+    // All sections are optional - handle missing data gracefully
+    populatePersonalInfo(data || {});
 
-    // Education
+    // Education - optional
     const educationContainer = document.querySelector('.repeatable-fields[data-section="education"]');
-    addEntries(educationContainer, ".field-entry.template", data.education || [], fillEducation);
+    addEntries(educationContainer, ".field-entry.template", data.education, fillEducation);
 
-    // Experience
+    // Experience - optional
     const experienceContainer = document.querySelector('.repeatable-fields[data-section="experience"]');
-    addEntries(experienceContainer, ".field-entry.template", data.experience || [], fillExperience);
+    addEntries(experienceContainer, ".field-entry.template", data.experience, fillExperience);
 
-    // Projects
+    // Projects - optional
     const projectsContainer = document.querySelector('.repeatable-fields[data-section="projects"]');
-    addEntries(projectsContainer, ".field-entry.template", data.projects || [], fillProject);
+    addEntries(projectsContainer, ".field-entry.template", data.projects, fillProject);
   }
 
-  // Attach event listener to Load Sample Data button
+  // Attach event listener to Load Sample Data button - optional feature
   if (loadDataButton) {
     loadDataButton.addEventListener("click", () => {
       populateForm(sampleData);
     });
   }
 
-  // Add button logic to clone template entries on demand
+  // Add button logic to clone template entries on demand - always available
   addButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const sectionName = button.getAttribute("data-add");
       const container = document.querySelector(`.repeatable-fields[data-section="${sectionName}"]`);
+      
+      if (!container) return;
+      
       const template = container.querySelector(".field-entry.template");
       if (template) {
         const newEntry = template.cloneNode(true);
         newEntry.style.display = "";
         newEntry.classList.remove("template");
 
-        // Clear input/textarea values
+        // Clear input/textarea values to start fresh
         newEntry.querySelectorAll("input, textarea").forEach((input) => {
           input.value = "";
         });
@@ -160,15 +203,51 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-
-
-
-document.body.addEventListener('click', function (e) {
-  if (e.target.classList.contains('remove-entry-button')) {
-    const entry = e.target.closest('.field-entry');
-    if (entry) {
-      entry.remove();
+  // Remove entry functionality - allows removing even if fields are empty
+  document.body.addEventListener('click', function (e) {
+    if (e.target.classList.contains('remove-entry-button')) {
+      const entry = e.target.closest('.field-entry');
+      if (entry && !entry.classList.contains('template')) {
+        entry.remove();
+      }
     }
+  });
+
+  // Make all form fields optional by removing required attributes
+  function makeFieldsOptional() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      // Remove any existing required attributes to make all fields optional
+      form.querySelectorAll('input[required], textarea[required], select[required]').forEach(field => {
+        field.removeAttribute('required');
+      });
+      
+      // Allow form submission even with empty fields
+      form.addEventListener('submit', function(e) {
+        // Remove any browser validation that might prevent submission
+        const inputs = form.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+          input.setCustomValidity(''); // Clear any custom validation messages
+        });
+      });
+    });
   }
-});  
+
+  // Initialize optional field behavior
+  makeFieldsOptional();
+
+  // Re-apply optional field behavior when new entries are added
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+        makeFieldsOptional();
+      }
+    });
+  });
+
+  // Start observing for dynamically added form elements
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 });

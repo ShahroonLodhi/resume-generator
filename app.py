@@ -42,72 +42,120 @@ def index():
 @app.route('/generate', methods=['POST'])
 def generate_resume():
     """Processes form data and generates the resume based on initial template choice."""
-    name = request.form.get('name')
-    location = request.form.get('location')
-    phone = request.form.get('phone')
-    email = request.form.get('email')
-    linkedin = request.form.get('linkedin')
-    github = request.form.get('github')
+    # Personal information - all optional with safe defaults
+    name = request.form.get('name', '').strip()
+    location = request.form.get('location', '').strip()
+    phone = request.form.get('phone', '').strip()
+    email = request.form.get('email', '').strip()
+    linkedin = request.form.get('linkedin', '').strip()
+    github = request.form.get('github', '').strip()
 
+    # Education - all fields optional
     education = []
     institutions = request.form.getlist('institution[]')
     locations = request.form.getlist('edu_location[]')
     degrees = request.form.getlist('degree[]')
     dates = request.form.getlist('edu_dates[]')
     gpas = request.form.getlist('gpa[]')
+    
+    # Only add education entries that have at least one non-empty field
     for i in range(len(institutions)):
-        if institutions[i].strip():
-            education.append({
-                'institution': institutions[i],
-                'location': locations[i],
-                'degree': degrees[i],
-                'dates': dates[i],
-                'gpa': gpas[i]
-            })
+        entry = {
+            'institution': institutions[i].strip() if i < len(institutions) else '',
+            'location': locations[i].strip() if i < len(locations) else '',
+            'degree': degrees[i].strip() if i < len(degrees) else '',
+            'dates': dates[i].strip() if i < len(dates) else '',
+            'gpa': gpas[i].strip() if i < len(gpas) else ''
+        }
+        # Add entry if any field has content
+        if any(entry.values()):
+            education.append(entry)
 
+    # Experience - all fields optional
     experience = []
     roles = request.form.getlist('role[]')
     companies = request.form.getlist('company[]')
     exp_locations = request.form.getlist('exp_location[]')
     years = request.form.getlist('years[]')
     details_str = request.form.getlist('exp_details[]')
-    for i in range(len(roles)):
-        if roles[i].strip():
-            details = [line.strip() for line in details_str[i].split('\n') if line.strip()]
-            experience.append({
-                'role': roles[i],
-                'company': companies[i],
-                'location': exp_locations[i],
-                'years': years[i],
-                'details': details
-            })
+    
+    # Determine the maximum length to handle mismatched arrays
+    max_exp_length = max(len(roles), len(companies), len(exp_locations), len(years), len(details_str)) if any([roles, companies, exp_locations, years, details_str]) else 0
+    
+    for i in range(max_exp_length):
+        role = roles[i].strip() if i < len(roles) else ''
+        company = companies[i].strip() if i < len(companies) else ''
+        exp_location = exp_locations[i].strip() if i < len(exp_locations) else ''
+        year = years[i].strip() if i < len(years) else ''
+        detail_text = details_str[i].strip() if i < len(details_str) else ''
+        
+        # Process details - split by newlines and filter empty lines
+        details = [line.strip() for line in detail_text.split('\n') if line.strip()] if detail_text else []
+        
+        entry = {
+            'role': role,
+            'company': company,
+            'location': exp_location,
+            'years': year,
+            'details': details
+        }
+        
+        # Add entry if any field has content
+        if role or company or exp_location or year or details:
+            experience.append(entry)
 
+    # Projects - all fields optional
     projects = []
     project_names = request.form.getlist('project_name[]')
     technologies_list = request.form.getlist('technologies[]')
     proj_dates_list = request.form.getlist('proj_dates[]')
     proj_summaries = request.form.getlist('proj_summary[]')
-    for i in range(len(project_names)):
-        if project_names[i].strip():
-            projects.append({
-                'name': project_names[i],
-                'technologies': technologies_list[i],
-                'dates': proj_dates_list[i],
-                'summary': proj_summaries[i]
-            })
-
-    skills = {}
-    languages_list = [s.strip() for s in request.form.get('languages', '').split(',') if s.strip()]
-    if languages_list:
-        skills['Languages'] = languages_list
-    software_list = [s.strip() for s in request.form.get('software', '').split(',') if s.strip()]
-    if software_list:
-        skills['Software'] = software_list
     
+    max_proj_length = max(len(project_names), len(technologies_list), len(proj_dates_list), len(proj_summaries)) if any([project_names, technologies_list, proj_dates_list, proj_summaries]) else 0
+    
+    for i in range(max_proj_length):
+        name_val = project_names[i].strip() if i < len(project_names) else ''
+        tech_val = technologies_list[i].strip() if i < len(technologies_list) else ''
+        dates_val = proj_dates_list[i].strip() if i < len(proj_dates_list) else ''
+        summary_val = proj_summaries[i].strip() if i < len(proj_summaries) else ''
+        
+        entry = {
+            'name': name_val,
+            'technologies': tech_val,
+            'dates': dates_val,
+            'summary': summary_val
+        }
+        
+        # Add entry if any field has content
+        if any(entry.values()):
+            projects.append(entry)
+
+    # Skills - optional with safe handling
+    skills = {}
+    languages_input = request.form.get('languages', '').strip()
+    if languages_input:
+        languages_list = [s.strip() for s in languages_input.split(',') if s.strip()]
+        if languages_list:
+            skills['Languages'] = languages_list
+    
+    software_input = request.form.get('software', '').strip()
+    if software_input:
+        software_list = [s.strip() for s in software_input.split(',') if s.strip()]
+        if software_list:
+            skills['Software'] = software_list
+    
+    # Build complete data dictionary
     data = {
-        'name': name, 'location': location, 'phone': phone, 'email': email,
-        'linkedin': linkedin, 'github': github, 'education': education,
-        'experience': experience, 'projects': projects, 'skills': skills,
+        'name': name,
+        'location': location,
+        'phone': phone,
+        'email': email,
+        'linkedin': linkedin,
+        'github': github,
+        'education': education,
+        'experience': experience,
+        'projects': projects,
+        'skills': skills,
         'template_choice': request.form.get('template_choice', 'professional')
     }
 
